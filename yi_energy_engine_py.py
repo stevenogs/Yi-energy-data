@@ -7,9 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1FxCaQAUlC38_Ol9vzKP5pYvrJ4ITk3qp
 """
 
-import sys
-!{sys.executable} -m pip install lunar_python
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
