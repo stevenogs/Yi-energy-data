@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Yi Energy Real-Time Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
+    <style>
+        body { background-color: #0d0d0d; color: #d4d4d4; font-family: 'Consolas', monospace; padding: 40px; }
+        .card { background: #1a1a1a; padding: 30px; border-radius: 8px; border: 1px solid #333; max-width: 600px; margin: auto; }
+        h1 { color: #64ffda; font-size: 20px; }
+        .score { font-size: 24px; color: #fff; margin: 10px 0; }
+        .log { font-size: 13px; color: #888; margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="card" id="app">
+    <h1>⚙️ Yi Energy: Real-Time Engine</h1>
+    <div id="output">正在進行時空矩陣解算...</div>
+</div>
+
+<script>
+class YiEnergyEngine {
+    constructor() {
+        this.origin_matrix = { "shen": true, "zi": true, "chen": true, "xu": true };
+    }
+
+    _countOccurrences(arr, val) { return arr.filter(item => item === val).length; }
+
+    calculateStresses(year, month, day, hour) {
+        const solar = Solar.fromYmdHms(year, month, day, hour, 0, 0);
+        const lunar = Lunar.fromSolar(solar);
+        const eight = lunar.getEightChar();
+        
+        const allZhi = [eight.getYearZhi(), eight.getMonthZhi(), eight.getDayZhi(), eight.getTimeZhi()];
+        const allGan = [eight.getYearGan(), eight.getMonthGan(), eight.getDayGan(), eight.getTimeGan()];
+        
+        let wealthScore = 1.0, stressScore = 1.0, logs = [];
+
+        // --- 演算法核心 ---
+        if (allZhi.includes("子")) { wealthScore += 2.5; logs.push("🌊 財星大潮解鎖"); }
+        if (allZhi.includes("申") || allZhi.includes("酉")) { wealthScore += 1.0; logs.push("🔨 食傷產線送料"); }
+        
+        const xuCount = this._countOccurrences(allZhi, "戌");
+        if (xuCount > 0 && this.origin_matrix["chen"]) {
+            stressScore += (xuCount * 1.5);
+            logs.push("💥 辰戌大衝觸發");
+        }
+
+        let status = "NORMAL";
+        if (wealthScore >= 2.0) status = "WEALTH_READY";
+        if (wealthScore >= 2.0 && stressScore >= 1.0) status = "BREAKTHROUGH";
+
+        return {
+            timestamp: `${year}-${month}-${day} ${hour}:00`,
+            wealth: wealthScore.toFixed(1),
+            stress: stressScore.toFixed(1),
+            status: status,
+            logs: logs
+        };
+    }
+}
+
+// 自動執行並渲染
+const now = new Date();
+const engine = new YiEnergyEngine();
+const report = engine.calculateStresses(now.getFullYear(), now.getMonth() + 1, now.getDate(), now.getHours());
+
+document.getElementById('output').innerHTML = `
+    <div class="score">👑 狀態: ${report.status}</div>
+    <p>觀測時間: ${report.timestamp}</p>
+    <p>財氣噴寶: ${report.wealth} / 5.0</p>
+    <p>內在應力: ${report.stress} / 5.0</p>
+    <div class="log">${report.logs.length > 0 ? report.logs.join('<br>') : '系統運行正常，無異常觸發。'}</div>
+`;
+</script>
+</body>
+</html>
